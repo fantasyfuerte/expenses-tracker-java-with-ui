@@ -1,25 +1,26 @@
+import java.util.UUID;
+
 public class Category {
   private String name;
-  private String color;
-  private int id;
+  private Color color = Color.LIGHT_GRAY;
+  private UUID id;
 
-  public Category(String name, int id) {
+  public Category(String name) {
     this.name = name;
-    this.id = id;
-    this.color = "default";
+    this.id = UUID.randomUUID();
   }
 
-  public Category(String name, String color, int id) {
+  public Category(String name, Color color) {
     this.name = name;
     this.color = color;
-    this.id = id;
+    this.id = UUID.randomUUID();
   }
 
   public String getName() {
     return name;
   }
 
-  public String getColor() {
+  public Color getColor() {
     return color;
   }
 
@@ -27,11 +28,11 @@ public class Category {
     this.name = name;
   }
 
-  public void setColor(String color) {
+  public void setColor(Color color) {
     this.color = color;
   }
 
-  public int getId() {
+  public UUID getId() {
     return id;
   }
 }
