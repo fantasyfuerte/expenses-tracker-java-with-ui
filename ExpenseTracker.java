@@ -8,8 +8,9 @@ public class ExpenseTracker {
     this.expenses = new ArrayList<Expense>();
   }
 
-  public Expense addExpense(double amount, String description, LocalDateTime date) {
-    Expense expense = new Expense(amount, description, date);
+  public Expense addExpense(
+      double amount, String description, LocalDateTime date, Category category) {
+    Expense expense = new Expense(amount, description, category, date);
     this.expenses.add(expense);
     return expense;
   }

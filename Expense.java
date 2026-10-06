@@ -4,12 +4,14 @@ import java.time.format.DateTimeFormatter;
 public class Expense {
   private double amount;
   private String description;
+  private Category category;
   private LocalDateTime rawDate;
   private String date;
 
-  public Expense(double amount, String description, LocalDateTime rawDate) {
+  public Expense(double amount, String description, Category category, LocalDateTime rawDate) {
     this.amount = amount;
     this.description = description;
+    this.category = category;
     this.rawDate = rawDate;
     DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     this.date = rawDate.format(format);
