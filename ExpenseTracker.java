@@ -44,6 +44,9 @@ public class ExpenseTracker {
   }
 
   public void displayExpenses() {
+    if (expenses.size() == 0) {
+      System.out.println("No expenses.");
+    }
     for (Expense expense : expenses) {
       System.out.println(expense.getInfo());
     }
