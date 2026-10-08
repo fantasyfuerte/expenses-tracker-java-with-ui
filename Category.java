@@ -35,4 +35,8 @@ public class Category {
   public UUID getId() {
     return id;
   }
+
+  public void displayInfo() {
+    System.out.println("Category name: " + name + " Badge color: " + color);
+  }
 }
