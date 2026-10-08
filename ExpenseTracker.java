@@ -47,6 +47,14 @@ public class ExpenseTracker {
     return expense;
   }
 
+  public Double getTotal() {
+    Double total = 0.0;
+    for (Expense expense : expenses) {
+      total += expense.getAmount();
+    }
+    return total;
+  }
+
   public void displayExpenses() {
     if (expenses.size() == 0) {
       System.out.println("No expenses.");
