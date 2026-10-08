@@ -7,6 +7,10 @@ public class CategoryTracker {
     this.categories = new ArrayList<Category>();
   }
 
+  public ArrayList<Category> getCategories() {
+    return this.categories;
+  }
+
   public Category getCategory(int index) {
     return this.categories.get(index);
   }
