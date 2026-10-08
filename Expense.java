@@ -67,8 +67,8 @@ public class Expense {
         + this.description
         + " on "
         + this.date
-        + ". Belongs to "
-        + this.category.getName()
-        + " category.";
+        + (this.category != null
+            ? ". Belongs to " + this.category.getName() + "."
+            : ". Has no category.");
   }
 }
