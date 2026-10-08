@@ -1,5 +1,6 @@
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ExpenseTracker {
   private ArrayList<Expense> expenses;
@@ -53,6 +54,15 @@ public class ExpenseTracker {
       total += expense.getAmount();
     }
     return total;
+  }
+
+  public void removeCategoryOcurrences(Category category) {
+    UUID id = category.getId();
+    for (Expense expense : expenses) {
+      if (expense.getCategory().getId() == id) {
+        expense.setCategory(null);
+      }
+    }
   }
 
   public void displayExpenses() {

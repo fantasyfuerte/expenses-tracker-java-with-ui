@@ -21,8 +21,9 @@ public class CategoryTracker {
     return category;
   }
 
-  public Category removeCategory(int index) {
+  public Category removeCategory(int index, ExpenseTracker etracker) {
     Category category = categories.get(index);
+    etracker.removeCategoryOcurrences(category);
     this.categories.remove(index);
     return category;
   }
