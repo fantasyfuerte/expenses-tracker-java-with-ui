@@ -54,6 +54,8 @@ public class Expense {
 
   public void setRawDate(LocalDateTime rawDate) {
     this.rawDate = rawDate;
+    DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    this.date = rawDate.format(format);
   }
 
   public void setCategory(Category category) {
