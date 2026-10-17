@@ -122,9 +122,14 @@ public class MainWindow extends JFrame {
     editButton.addActionListener(e -> editExpense());
     deleteButton.addActionListener(e -> deleteExpense());
 
+    JButton categoriesButton = new JButton("Categories");
+    categoriesButton.addActionListener(e -> manageCategories());
+
     bar.add(addButton);
     bar.add(editButton);
     bar.add(deleteButton);
+    bar.addSeparator();
+    bar.add(categoriesButton);
     return bar;
   }
 
@@ -172,7 +177,14 @@ public class MainWindow extends JFrame {
     aboutItem.addActionListener(e -> showAbout());
     helpMenu.add(aboutItem);
 
+    JMenu categoriesMenu = new JMenu("Categories");
+    JMenuItem manageItem = new JMenuItem("Manage categories...");
+    manageItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, shortcut));
+    manageItem.addActionListener(e -> manageCategories());
+    categoriesMenu.add(manageItem);
+
     menuBar.add(fileMenu);
+    menuBar.add(categoriesMenu);
     menuBar.add(helpMenu);
     return menuBar;
   }
@@ -248,6 +260,12 @@ public class MainWindow extends JFrame {
         "Expenses Tracker\nExpenses tracker with Java Swing\n\nMVP: list and CRUD in memory.",
         "About",
         JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  private void manageCategories() {
+    CategoryManagerDialog dialog = new CategoryManagerDialog(this, categoryTracker, tracker);
+    dialog.setVisible(true);
+    tableModel.refreshData();
   }
 
   private void refreshTotal() {
