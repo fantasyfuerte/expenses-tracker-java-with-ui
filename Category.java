@@ -39,4 +39,9 @@ public class Category {
   public void displayInfo() {
     System.out.println("Category name: " + name + " Badge color: " + color);
   }
+
+  @Override
+  public String toString() {
+    return name;
+  }
 }
