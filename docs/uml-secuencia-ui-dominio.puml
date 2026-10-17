@@ -1,0 +1,109 @@
+@startuml
+title Expenses Tracker — Cómo la UI llama al dominio
+
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam sequenceMessageAlign center
+skinparam sequenceArrowThickness 1.2
+skinparam roundcorner 8
+skinparam ParticipantBorderColor #1F3A5F
+skinparam ParticipantBackgroundColor #FFFFFF
+skinparam ActorBorderColor #1F3A5F
+skinparam NoteBackgroundColor #FFF7E0
+skinparam NoteBorderColor #C9A227
+
+actor "Usuario" as U
+
+box "UI Swing (presentación)" #EAF2FB
+  participant "MainWindow\n(JFrame)" as MW
+  participant "ExpenseFormDialog\n(JDialog)" as FD
+end box
+
+box "Adaptador UI<->dominio" #F0F7EE
+  participant "ExpenseTableModel\n(AbstractTableModel)" as TM
+end box
+
+box "Dominio" #FBF3EA
+  participant "ExpenseTracker" as ET
+  participant "Expense" as E
+  participant "CategoryTracker" as CT
+end box
+
+note over MW, TM
+  La UI NUNCA toca el ArrayList<Expense> directamente:
+  siempre pasa por ExpenseTracker (via ExpenseTableModel).
+end note
+
+== Render inicial de la JTable ==
+TM -> ET : getExpenses().size()
+ET --> TM : int
+loop por cada fila visible
+  TM -> ET : getExpense(rowIndex)
+  ET --> TM : Expense
+  TM -> E : getDescription() / getAmount()\n getCategory() / getRawDate()
+  E --> TM : valores de la celda
+end
+
+== Añadir gasto ==
+U -> MW : clic "Anadir"
+MW -> CT : getCategories()
+CT --> MW : ArrayList<Category>
+MW -> FD : new ExpenseFormDialog(this, categoryTracker, null)
+FD -> CT : getCategories()
+CT --> FD : categorias para el combo
+U -> FD : completar campos + "Guardar"
+FD -> FD : onSave() valida
+FD --> MW : dispose()  (isConfirmed() == true)
+MW -> TM : addExpense(amount, desc, category, date)
+TM -> ET : addExpense(...)
+ET -> E : new Expense(...)
+ET --> TM : Expense agregado
+TM --> MW : fireTableRowsInserted()
+MW -> ET : getTotal()
+ET --> MW : Double
+MW -> MW : refreshTotal()
+
+== Editar gasto ==
+U -> MW : doble clic / "Editar"
+MW -> MW : convertRowIndexToModel(viewRow)
+MW -> TM : getExpenseAt(modelRow)
+TM -> ET : getExpense(modelRow)
+ET --> TM : Expense
+TM --> MW : Expense
+MW -> FD : new ExpenseFormDialog(this, categoryTracker, expense)
+FD -> E : getDescription() / getAmount()\n getCategory() / getRawDate()
+E --> FD : precarga campos
+U -> FD : editar + "Guardar"
+FD --> MW : isConfirmed() == true
+MW -> TM : updateExpense(modelRow, ...)
+TM -> ET : updateExpense(...)
+ET -> E : setAmount / setDescription\n setCategory / setRawDate
+ET --> TM : Expense
+TM --> MW : fireTableRowsUpdated()
+MW -> ET : getTotal()
+ET --> MW : Double
+MW -> MW : refreshTotal()
+
+== Eliminar gasto ==
+U -> MW : "Eliminar" / tecla Supr
+MW -> TM : getExpenseAt(modelRow)
+TM -> ET : getExpense(modelRow)
+ET --> TM : Expense
+TM --> MW : Expense
+MW -> MW : JOptionPane.showConfirmDialog(...)
+MW -> TM : removeExpense(modelRow)
+TM -> ET : removeExpense(modelRow)
+ET --> TM : Expense eliminado
+TM --> MW : fireTableRowsDeleted()
+MW -> ET : getTotal()
+ET --> MW : Double
+MW -> MW : refreshTotal()
+
+note over MW, ET
+  El total de la ventana SIEMPRE se recalcula
+  pidiendo getTotal() al dominio tras cada cambio.
+end note
+
+@enduml

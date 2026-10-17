@@ -1,0 +1,212 @@
+@startuml
+!pragma layout smetana
+title Expenses Tracker — Diagrama de clases
+
+skinparam dpi 140
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+skinparam nodesep 28
+skinparam ranksep 42
+skinparam ArrowColor #555555
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #1F3A5F
+skinparam classHeaderBackgroundColor #1F3A5F
+skinparam classFontColor #1F2937
+skinparam enumBackgroundColor #FFFFFF
+skinparam enumBorderColor #7C3AED
+skinparam enumHeaderBackgroundColor #7C3AED
+
+package "Dominio" {
+  enum Color {
+    RED
+    GREEN
+    BLUE
+    YELLOW
+    PURPLE
+    ORANGE
+    PINK
+    GRAY
+    LIGHT_GRAY
+    DARK_GRAY
+    BLACK
+    WHITE
+  }
+
+  class Category {
+    - name : String
+    - color : Color
+    - id : UUID
+    --
+    + getName() : String
+    + getColor() : Color
+    + setName(String) : void
+    + setColor(Color) : void
+    + getId() : UUID
+    + displayInfo() : void
+  }
+
+  class Expense {
+    - id : UUID
+    - amount : double
+    - description : String
+    - category : Category
+    - rawDate : LocalDateTime
+    - date : String
+    --
+    + getAmount() : double
+    + getDescription() : String
+    + getRawDate() : LocalDateTime
+    + getFormatedDate() : String
+    + getCategory() : Category
+    + setAmount(double) : void
+    + setDescription(String) : void
+    + setRawDate(LocalDateTime) : void
+    + setCategory(Category) : void
+    + getInfo() : String
+  }
+
+  class ExpenseTracker {
+    - expenses : ArrayList<Expense>
+    --
+    + addExpense(double, String, Category, LocalDateTime) : Expense
+    + getExpense(int) : Expense
+    + getExpenses() : ArrayList<Expense>
+    + updateExpense(int, Double, String, Category, LocalDateTime) : Expense
+    + removeExpense(int) : Expense
+    + getTotal() : Double
+    + removeCategoryOcurrences(Category) : void
+    + displayExpenses() : void
+  }
+
+  class CategoryTracker {
+    - categories : ArrayList<Category>
+    --
+    + addCategory(String, Color) : Category
+    + getCategory(int) : Category
+    + getCategories() : ArrayList<Category>
+    + updateCategory(int, String, Color) : Category
+    + removeCategory(int, ExpenseTracker) : Category
+    + displayCategories() : void
+  }
+}
+
+package "UI Swing" {
+  class App {
+    {static} + main(String[]) : void
+  }
+
+  class MainWindow {
+    - tracker : ExpenseTracker
+    - categoryTracker : CategoryTracker
+    - tableModel : ExpenseTableModel
+    - table : JTable
+    - totalLabel : JLabel
+    --
+    + MainWindow(ExpenseTracker, CategoryTracker)
+    - addExpense() : void
+    - editExpense() : void
+    - deleteExpense() : void
+    - configureTable() : void
+    - refreshTotal() : void
+    - updateButtons() : void
+  }
+
+  class ExpenseTableModel {
+    - tracker : ExpenseTracker
+    --
+    + getRowCount() : int
+    + getValueAt(int, int) : Object
+    + getExpenseAt(int) : Expense
+    + addExpense(double, String, Category, LocalDateTime) : void
+    + updateExpense(int, double, String, Category, LocalDateTime) : void
+    + removeExpense(int) : void
+  }
+
+  class ExpenseFormDialog {
+    - descriptionField : JTextField
+    - amountSpinner : JSpinner
+    - categoryCombo : JComboBox<Category>
+    - dateSpinner : JSpinner
+    - confirmed : boolean
+    --
+    + isConfirmed() : boolean
+    + getDescription() : String
+    + getAmount() : double
+    + getCategory() : Category
+    + getDate() : LocalDateTime
+  }
+
+  class ColorUtil {
+    {static} + toAwt(Color) : java.awt.Color
+    {static} + contrast(java.awt.Color) : java.awt.Color
+  }
+
+  class AmountCellRenderer {
+    + getTableCellRendererComponent(...) : Component
+  }
+
+  class CategoryCellRenderer {
+    + getTableCellRendererComponent(...) : Component
+  }
+}
+
+package "Consola" {
+  class Main {
+    {static} + main(String[]) : void
+  }
+}
+
+package "Externo (JDK)" {
+  class JFrame
+  class JDialog
+  class AbstractTableModel
+  class DefaultTableCellRenderer
+  class "java.awt.Color" as ColorAwt
+  class JTable
+  class JComboBox
+}
+
+' ---------- Herencia ----------
+MainWindow --|> JFrame
+ExpenseFormDialog --|> JDialog
+ExpenseTableModel --|> AbstractTableModel
+AmountCellRenderer --|> DefaultTableCellRenderer
+CategoryCellRenderer --|> DefaultTableCellRenderer
+
+' ---------- Composicion / Agregacion ----------
+ExpenseTracker "1" o-- "0..*" Expense : expenses
+CategoryTracker "1" o-- "0..*" Category : categories
+MainWindow "1" *-- "1" ExpenseTableModel : tableModel
+
+' ---------- Asociacion ----------
+Expense "0..*" --> "0..1" Category : category
+Category --> Color : color
+
+' ---------- Dependencias ----------
+CategoryTracker ..> ExpenseTracker : removeCategory()
+App ..> MainWindow : crea
+App ..> ExpenseTracker : crea
+App ..> CategoryTracker : crea
+Main ..> ExpenseTracker : crea
+Main ..> CategoryTracker : crea
+MainWindow --> ExpenseTracker : getTotal()
+MainWindow --> CategoryTracker : getCategories()
+MainWindow ..> ExpenseFormDialog : abre (modal)
+MainWindow ..> AmountCellRenderer : instala
+MainWindow ..> CategoryCellRenderer : instala
+ExpenseTableModel --> ExpenseTracker : delega CRUD
+ExpenseTableModel ..> Expense : lee
+ExpenseTableModel ..> Category : expone columna
+ExpenseFormDialog ..> CategoryTracker : lee categorias
+ExpenseFormDialog ..> Category : items del combo
+ExpenseFormDialog ..> Expense : precarga
+CategoryCellRenderer ..> ColorUtil
+CategoryCellRenderer ..> Category
+ColorUtil ..> Color : mapea
+ColorUtil ..> ColorAwt : produce
+
+@enduml
