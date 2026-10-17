@@ -57,9 +57,13 @@ public class ExpenseTracker {
   }
 
   public void removeCategoryOcurrences(Category category) {
+    if (category == null) {
+      return;
+    }
     UUID id = category.getId();
     for (Expense expense : expenses) {
-      if (expense.getCategory().getId() == id) {
+      Category current = expense.getCategory();
+      if (current != null && id.equals(current.getId())) {
         expense.setCategory(null);
       }
     }
