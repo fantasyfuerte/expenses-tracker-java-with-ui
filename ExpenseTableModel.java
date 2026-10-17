@@ -72,4 +72,8 @@ public class ExpenseTableModel extends AbstractTableModel {
     tracker.removeExpense(rowIndex);
     fireTableRowsDeleted(rowIndex, rowIndex);
   }
+
+  public void refreshData() {
+    fireTableDataChanged();
+  }
 }
