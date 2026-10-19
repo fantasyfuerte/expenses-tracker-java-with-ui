@@ -11,6 +11,7 @@ public class App {
           try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
           } catch (Exception ignored) {
+            // ignored
           }
 
           ExpenseTracker tracker = new ExpenseTracker();
