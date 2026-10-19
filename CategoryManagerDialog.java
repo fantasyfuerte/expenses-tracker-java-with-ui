@@ -19,7 +19,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 
 public class CategoryManagerDialog extends JDialog {
-  private final ExpenseTracker expenseTracker;
   private final CategoryTableModel tableModel;
   private final JTable table;
 
@@ -29,7 +28,6 @@ public class CategoryManagerDialog extends JDialog {
   public CategoryManagerDialog(
       Frame owner, CategoryTracker categoryTracker, ExpenseTracker expenseTracker) {
     super(owner, "Categories", true);
-    this.expenseTracker = expenseTracker;
     this.tableModel = new CategoryTableModel(categoryTracker, expenseTracker);
     this.table = new JTable(tableModel);
 
