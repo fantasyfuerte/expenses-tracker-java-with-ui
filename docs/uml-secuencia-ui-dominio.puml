@@ -19,10 +19,13 @@ actor "Usuario" as U
 box "UI Swing (presentación)" #EAF2FB
   participant "MainWindow\n(JFrame)" as MW
   participant "ExpenseFormDialog\n(JDialog)" as FD
+  participant "CategoryManagerDialog\n(JDialog)" as CMD
+  participant "CategoryFormDialog\n(JDialog)" as CFD
 end box
 
 box "Adaptador UI<->dominio" #F0F7EE
   participant "ExpenseTableModel\n(AbstractTableModel)" as TM
+  participant "CategoryTableModel\n(AbstractTableModel)" as CTM
 end box
 
 box "Dominio" #FBF3EA
@@ -100,6 +103,53 @@ TM --> MW : fireTableRowsDeleted()
 MW -> ET : getTotal()
 ET --> MW : Double
 MW -> MW : refreshTotal()
+
+== Gestionar categorias ==
+U -> MW : clic "Categories" / Ctrl+K
+MW -> CMD : new CategoryManagerDialog(this, categoryTracker, tracker)
+CMD -> CTM : new CategoryTableModel(categoryTracker, tracker)
+CTM -> CT : getCategories().size()
+CT --> CTM : int
+loop por cada categoria
+  CTM -> CT : getCategory(rowIndex)
+  CT --> CTM : Category
+  CTM -> ET : getExpenses()
+  ET --> CTM : recuento de gastos por categoria
+end
+
+group Anadir / Editar categoria
+  U -> CMD : "Add" / "Edit" / doble clic
+  CMD -> CFD : new CategoryFormDialog(owner, category)
+  CFD -> CFD : precarga nombre y color si es edicion
+  U -> CFD : nombre + color + "Save"
+  CFD -> CFD : onSave() valida nombre no vacio
+  CFD --> CMD : isConfirmed() == true
+  CMD -> CTM : addCategory(name, color) / updateCategory(row, ...)
+  CTM -> CT : addCategory(...) / updateCategory(...)
+  CT --> CTM : Category creada / actualizada
+  CTM --> CMD : fireTableRowsInserted() / fireTableRowsUpdated()
+end
+
+group Eliminar categoria
+  U -> CMD : "Delete" / tecla Supr
+  CMD -> CTM : countExpenses(category)
+  CTM --> CMD : int  (gastos que la usan)
+  CMD -> CMD : showConfirmDialog(...)  (avisa si esta en uso)
+  CMD -> CTM : removeCategory(row)
+  CTM -> CT : removeCategory(row, expenseTracker)
+  CT -> ET : removeCategoryOcurrences(category)
+  ET -> E : setCategory(null)
+  ET --> CT : void
+  CTM --> CMD : fireTableRowsDeleted()
+end
+
+U -> CMD : "Close"
+CMD --> MW : dispose()
+note over MW, TM
+  Al cerrar el gestor, MainWindow llama a tableModel.refreshData()
+  para que la tabla de gastos refleje renombres y eliminaciones
+  (las categorias borradas pasan a mostrarse como "No category").
+end note
 
 note over MW, ET
   El total de la ventana SIEMPRE se recalcula

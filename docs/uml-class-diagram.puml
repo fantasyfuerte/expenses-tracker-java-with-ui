@@ -47,6 +47,7 @@ package "Dominio" {
     + setColor(Color) : void
     + getId() : UUID
     + displayInfo() : void
+    + toString() : String
   }
 
   class Expense {
@@ -110,6 +111,7 @@ package "UI Swing" {
     - addExpense() : void
     - editExpense() : void
     - deleteExpense() : void
+    - manageCategories() : void
     - configureTable() : void
     - refreshTotal() : void
     - updateButtons() : void
@@ -124,6 +126,20 @@ package "UI Swing" {
     + addExpense(double, String, Category, LocalDateTime) : void
     + updateExpense(int, double, String, Category, LocalDateTime) : void
     + removeExpense(int) : void
+    + refreshData() : void
+  }
+
+  class CategoryTableModel {
+    - categoryTracker : CategoryTracker
+    - expenseTracker : ExpenseTracker
+    --
+    + getRowCount() : int
+    + getValueAt(int, int) : Object
+    + getCategoryAt(int) : Category
+    + countExpenses(Category) : int
+    + addCategory(String, Color) : void
+    + updateCategory(int, String, Color) : void
+    + removeCategory(int) : void
   }
 
   class ExpenseFormDialog {
@@ -140,6 +156,30 @@ package "UI Swing" {
     + getDate() : LocalDateTime
   }
 
+  class CategoryManagerDialog {
+    - categoryTracker : CategoryTracker
+    - expenseTracker : ExpenseTracker
+    - tableModel : CategoryTableModel
+    - table : JTable
+    --
+    + isConfirmed() : boolean
+    - addCategory() : void
+    - editCategory() : void
+    - deleteCategory() : void
+    - configureTable() : void
+    - updateButtons() : void
+  }
+
+  class CategoryFormDialog {
+    - nameField : JTextField
+    - colorCombo : JComboBox<Color>
+    - confirmed : boolean
+    --
+    + isConfirmed() : boolean
+    + getCategoryName() : String
+    + getSelectedColor() : Color
+  }
+
   class ColorUtil {
     {static} + toAwt(Color) : java.awt.Color
     {static} + contrast(java.awt.Color) : java.awt.Color
@@ -151,6 +191,10 @@ package "UI Swing" {
 
   class CategoryCellRenderer {
     + getTableCellRendererComponent(...) : Component
+  }
+
+  class ColorCellRenderer {
+    + getListCellRendererComponent(...) : Component
   }
 }
 
@@ -165,6 +209,8 @@ package "Externo (JDK)" {
   class JDialog
   class AbstractTableModel
   class DefaultTableCellRenderer
+  class JLabel
+  class ListCellRenderer
   class "java.awt.Color" as ColorAwt
   class JTable
   class JComboBox
@@ -173,14 +219,20 @@ package "Externo (JDK)" {
 ' ---------- Herencia ----------
 MainWindow --|> JFrame
 ExpenseFormDialog --|> JDialog
+CategoryManagerDialog --|> JDialog
+CategoryFormDialog --|> JDialog
 ExpenseTableModel --|> AbstractTableModel
+CategoryTableModel --|> AbstractTableModel
 AmountCellRenderer --|> DefaultTableCellRenderer
 CategoryCellRenderer --|> DefaultTableCellRenderer
+ColorCellRenderer --|> JLabel
+ColorCellRenderer ..|> ListCellRenderer
 
 ' ---------- Composicion / Agregacion ----------
 ExpenseTracker "1" o-- "0..*" Expense : expenses
 CategoryTracker "1" o-- "0..*" Category : categories
 MainWindow "1" *-- "1" ExpenseTableModel : tableModel
+CategoryManagerDialog "1" *-- "1" CategoryTableModel : tableModel
 
 ' ---------- Asociacion ----------
 Expense "0..*" --> "0..1" Category : category
@@ -196,6 +248,7 @@ Main ..> CategoryTracker : crea
 MainWindow --> ExpenseTracker : getTotal()
 MainWindow --> CategoryTracker : getCategories()
 MainWindow ..> ExpenseFormDialog : abre (modal)
+MainWindow ..> CategoryManagerDialog : abre (modal)
 MainWindow ..> AmountCellRenderer : instala
 MainWindow ..> CategoryCellRenderer : instala
 ExpenseTableModel --> ExpenseTracker : delega CRUD
@@ -204,6 +257,18 @@ ExpenseTableModel ..> Category : expone columna
 ExpenseFormDialog ..> CategoryTracker : lee categorias
 ExpenseFormDialog ..> Category : items del combo
 ExpenseFormDialog ..> Expense : precarga
+CategoryManagerDialog --> CategoryTracker : delega CRUD
+CategoryManagerDialog --> ExpenseTracker : limpia al eliminar
+CategoryManagerDialog ..> CategoryFormDialog : abre (modal)
+CategoryManagerDialog ..> CategoryCellRenderer : instala
+CategoryTableModel --> CategoryTracker : delega CRUD
+CategoryTableModel --> ExpenseTracker : cuenta usos
+CategoryTableModel ..> Category : expone columna
+CategoryFormDialog ..> Category : precarga
+CategoryFormDialog ..> Color : items del combo
+CategoryFormDialog ..> ColorCellRenderer : usa
+ColorCellRenderer ..> Color : mapea
+ColorCellRenderer ..> ColorUtil : usa
 CategoryCellRenderer ..> ColorUtil
 CategoryCellRenderer ..> Category
 ColorUtil ..> Color : mapea
