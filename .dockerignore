@@ -1,0 +1,6 @@
+out/
+.git/
+docs/
+*.class
+README.md
+Dockerfile
